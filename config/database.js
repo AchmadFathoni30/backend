@@ -1,26 +1,29 @@
 const sql = require('mssql');
+require('dotenv').config(); 
 
+// Database configuration from environment variables
 const config = {
-  user: 'sa',
-  password: 'P@ssw0rd',
-  server: '127.0.0.1',
-  port: 1439, // Use a separate 'port' field instead of embedding it in 'server'
-  database: 'ApprovalDB',
+  user: process.env.DB_USER, 
+  password: process.env.DB_PASSWORD, 
+  server: process.env.DB_SERVER, 
+  port: parseInt(process.env.DB_PORT, 10) || 1433, 
+  database: process.env.DB_NAME, 
   options: {
-    encrypt: false, // Set to true if you are using Azure or need encrypted connections
-    enableArithAbort: true,
-  }
+    encrypt: process.env.DB_ENCRYPT === 'true',
+    enableArithAbort: true, 
+  },
 };
 
+// Create connection pool promise
 const poolPromise = new sql.ConnectionPool(config)
   .connect()
   .then(pool => {
-    console.log('Connected to SQL Server');
+    console.log('Connected to SQL Server successfully.');
     return pool;
   })
   .catch(err => {
-    console.error('Database Connection Failed!', err);
-    process.exit(1); // Exit the process if the connection fails
+    console.error('Database Connection Failed:', err.message);
+    process.exit(1); 
   });
 
 module.exports = { sql, poolPromise };
